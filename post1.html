@@ -1,20 +1,64 @@
-<!-- post1.html -->
-<!DOCTYPE html>
-<html>
-<head><title>Учебный проект Flask</title></head>
-<body>
-    <nav><ul><li><a href="/">Главная</a></li></ul></nav>
-    <article>
-        <h2>Это учебный проект на Flask</h2>
-        <p>Проект посвящён программированию и веб-разработке</p>
-        <ul>
-            <li><strong>Главная</strong> — приветствие, открывающее двери в мир кода.</li>
-            <li><strong>Три поста</strong> — подгружаются из файлов post1.html, post2.html, post3.html</li>
-            <li><strong>Монетка</strong> — случайный выбор между «Орлом» и «Решкой» через random, маленькая игра в непредсказуемость.</li>
-            <li><strong>Мем дня</strong> — выбирается по дню года через date.today().strftime("%j"), чтобы каждый день приносил свою порцию юмора.</li>
-            <li><strong>Секретная страница /secret</strong> — скрытый уголок, доступный лишь тем, кто знает путь.</li>
-            <li><strong>Обо мне</strong> — страница, где автор приоткрывает завесу своей истории.</li>
-        </ul>
-    </article>
-</body>
-</html>
+<article style="max-width: 900px; margin: 30px auto; padding: 24px; background: linear-gradient(180deg,#182318,#101710); color: #f4fff1; border: 4px solid #4f8f3e; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.28); font-family: Arial, sans-serif;">
+    <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-size:52px; line-height:1;">⛏️</div>
+        <h2 style="margin:10px 0 6px; color:#8ee66b; font-size:32px; text-shadow:2px 2px #1d4417;">Minecraft XP Calculator</h2>
+        <p style="margin:0; color:#c8e8bd; font-size:17px;">Калькулятор опыта Minecraft с темами, секретами и пасхалками</p>
+    </div>
+
+    <section style="background:rgba(255,255,255,.06); padding:18px; border-left:5px solid #8ee66b; border-radius:8px; margin-bottom:18px;">
+        <h3 style="margin-top:0; color:#a8f58b;">💡 Что это за проект?</h3>
+        <p style="line-height:1.65; margin-bottom:0;">
+            Я сделал небольшой сайт-калькулятор для Minecraft. В нём можно указать
+            <strong>текущий уровень</strong> и <strong>желаемый уровень</strong>,
+            а сайт рассчитывает, сколько опыта понадобится для прокачки.
+        </p>
+    </section>
+
+    <section style="margin-bottom:18px;">
+        <h3 style="color:#a8f58b;">⚙️ Что умеет сайт</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
+            <div style="background:#223522; padding:14px; border:2px solid #315d27; border-radius:8px;">
+                🧮 <strong>XP-калькулятор</strong><br>
+                <span style="color:#d7e8d1;">Считает опыт между выбранными уровнями.</span>
+            </div>
+            <div style="background:#223522; padding:14px; border:2px solid #315d27; border-radius:8px;">
+                📗 <strong>Таблица опыта</strong><br>
+                <span style="color:#d7e8d1;">Показывает XP за мобов и разные действия.</span>
+            </div>
+            <div style="background:#223522; padding:14px; border:2px solid #315d27; border-radius:8px;">
+                🌙 <strong>День / ночь</strong><br>
+                <span style="color:#d7e8d1;">Тему можно переключать, и выбор сохраняется.</span>
+            </div>
+            <div style="background:#223522; padding:14px; border:2px solid #315d27; border-radius:8px;">
+                💾 <strong>Сохранение прогресса</strong><br>
+                <span style="color:#d7e8d1;">Найденные секреты хранятся в localStorage.</span>
+            </div>
+        </div>
+    </section>
+
+    <section style="background:rgba(84,170,68,.12); padding:18px; border:2px dashed #62b94d; border-radius:10px; margin-bottom:18px;">
+        <h3 style="margin-top:0; color:#a8f58b;">🥚 10 скрытых пасхалок</h3>
+        <p style="line-height:1.65;">
+            Я спрятал на сайте целую коллекцию секретов. Среди них:
+            <strong>Herobrine</strong>, 💎 алмаз, 🟩 Крипер, 🐔 Chicken Jockey,
+            🐷 комбинация уровней <strong>6 → 9</strong>, 🐑 радужная овца <code style="background:#0b120b; padding:2px 6px; border-radius:4px;">jeb_</code>,
+            🐇 кролик Toast, 🐲 Дракон Края, 🟨 золотое яблоко и загадочный 🥚 секрет №10.
+        </p>
+        <p style="margin-bottom:0; color:#cdebc4;">
+            Некоторые из них требуют нескольких действий, поэтому сайт немного похож на мини-игру.
+        </p>
+    </section>
+
+    <section style="padding:16px; background:#172717; border-radius:8px;">
+        <h3 style="margin-top:0; color:#a8f58b;">🛠️ Что использовал</h3>
+        <p style="margin-bottom:0; line-height:1.7;">
+            Проект сочетает <strong>Flask</strong>, <strong>HTML</strong>, <strong>CSS</strong> и
+            <strong>JavaScript</strong>. Больше всего мне понравилось делать интерфейс в стиле Minecraft,
+            придумывать скрытые события и сохранять прогресс пользователя между перезагрузками страницы.
+        </p>
+    </section>
+
+    <p style="text-align:center; margin:24px 0 0; color:#8ee66b; font-weight:bold;">
+        🎮 Найдёшь все 10 пасхалок?
+    </p>
+</article>
