@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Гидросфера: тренажёр по карте</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea:#D3E8F2; --land:#FFFFFF; --coast:#33475B; --ink:#182433; --muted:#5B6B7B;
+  --panel:#FFFFFF; --line:#C9D6E0; --hl:#F2B705; --ok:#2F9E5B; --bad:#D64545; --btn:#1F5F8B; --btnText:#FFFFFF;
+  --c-sea:#1F78B4; --c-gulf:#6A3D9A; --c-strait:#E31A1C; --c-island:#33A02C; --c-pen:#B15928;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sea:#0F2633; --land:#26323D; --coast:#9DB2C4; --ink:#E7EEF4; --muted:#9AAAB8;
+    --panel:#17222C; --line:#2E3E4C; --hl:#F2C230; --ok:#4CC27E; --bad:#F06A6A; --btn:#4A9BD1; --btnText:#0B1A24;
+    --c-sea:#5AAEE6; --c-gulf:#B48AE0; --c-strait:#FF6B6B; --c-island:#6FD06A; --c-pen:#E59A5C;
+  }
+}
+:root[data-theme="dark"]{
+  --sea:#0F2633; --land:#26323D; --coast:#9DB2C4; --ink:#E7EEF4; --muted:#9AAAB8;
+  --panel:#17222C; --line:#2E3E4C; --hl:#F2C230; --ok:#4CC27E; --bad:#F06A6A; --btn:#4A9BD1; --btnText:#0B1A24;
+  --c-sea:#5AAEE6; --c-gulf:#B48AE0; --c-strait:#FF6B6B; --c-island:#6FD06A; --c-pen:#E59A5C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--sea);color:var(--ink);font-family:"Rubik",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.45}
+header{padding:14px 18px 8px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end;justify-content:space-between}
+h1{font-family:"Unbounded","Rubik",system-ui,sans-serif;font-weight:800;font-size:clamp(20px,3.4vw,30px);margin:0;letter-spacing:-.01em;line-height:1.1}
+h1 small{display:block;font-family:"Rubik",system-ui,sans-serif;font-weight:400;font-size:14px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.modes button{font:inherit;font-size:15px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--coast);background:var(--land);color:var(--ink);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--land);border-color:var(--ink)}
+.cats{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 10px}
+.cat{display:inline-flex;align-items:center;gap:7px;font-size:14px;padding:6px 11px;border-radius:8px;background:var(--land);border:1px solid var(--line);cursor:pointer;user-select:none}
+.cat input{margin:0;accent-color:var(--ink)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.cat .cnt{color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:0 12px 12px}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+.mapwrap{position:relative;background:var(--sea);border:1.5px solid var(--coast);border-radius:6px;overflow:hidden;min-height:420px;height:min(70vh,640px)}
+@media (max-width:860px){.mapwrap{height:56vh;min-height:320px}}
+#map{position:absolute;inset:0}
+.maptools{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.maptools button{font:inherit;font-size:13px;padding:6px 10px;border-radius:6px;border:1px solid var(--coast);background:var(--land);color:var(--ink);cursor:pointer}
+.maphint{position:absolute;left:8px;bottom:8px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--land) 85%,transparent);padding:3px 8px;border-radius:5px;z-index:5}
+.maperr{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink)}
+aside{background:var(--panel);border:1.5px solid var(--coast);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.task-kind{font-size:14px;color:var(--muted)}
+.task-name{font-family:"Unbounded","Rubik",system-ui,sans-serif;font-weight:600;font-size:24px;line-height:1.2;margin:0}
+.task-name .ttype{display:block;font-family:"Rubik",system-ui,sans-serif;font-weight:500;font-size:15px;margin-top:4px}
+.hint{font-size:15px;background:color-mix(in srgb,var(--hl) 22%,var(--panel));border-left:4px solid var(--hl);padding:8px 10px;border-radius:0 6px 6px 0}
+.opts{display:grid;gap:8px}
+.opts button,.primary,.ghost{font:inherit;font-size:16px;text-align:left;padding:10px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.opts button:hover:not(:disabled){border-color:var(--coast)}
+.opts button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--panel))}
+.opts button.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--panel))}
+.opts kbd{display:inline-block;min-width:1.4em;color:var(--muted);font-family:inherit;font-size:13px}
+.primary{background:var(--btn);color:var(--btnText);border-color:var(--btn);text-align:center;font-weight:500}
+.ghost{text-align:center;font-size:14px;padding:7px 10px}
+.verdict{font-weight:700;font-size:17px}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.score{display:flex;gap:14px;font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;flex-wrap:wrap}
+.score b{color:var(--ink);font-size:16px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.list{padding:0 18px 24px}
+.list h2{font-family:"Unbounded","Rubik",system-ui,sans-serif;font-weight:600;font-size:18px;margin:8px 0 10px}
+.list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.li{background:var(--land);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:14px;cursor:pointer}
+.li b{display:block;font-size:15px}
+.li span{color:var(--muted)}
+.li.learned b::after{content:" ✓";color:var(--ok)}
+button:focus-visible,.cat:focus-within,.li:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+#map{touch-action:none}
+button{touch-action:manipulation}
+.maptools #zin,.maptools #zout{font-size:20px;line-height:1;padding:6px 0;width:100%}
+.listhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.listhead .ghost{width:auto}
+@media (max-width:860px){
+  html,body{height:100%}
+  .app{display:flex;flex-direction:column;height:100%}
+  header{padding:8px 10px 6px;flex-wrap:nowrap;flex-direction:column;align-items:stretch;gap:8px}
+  h1{font-size:18px}
+  h1 small{display:none}
+  .modes,.cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .modes::-webkit-scrollbar,.cats::-webkit-scrollbar{display:none}
+  .modes button{flex:0 0 auto;font-size:14px;padding:9px 13px;min-height:40px}
+  .cats{padding:0 10px 8px}
+  .cat{flex:0 0 auto;font-size:13px;padding:8px 10px;min-height:38px}
+  main{display:flex;flex-direction:column;flex:1;min-height:0;padding:0 8px 8px;gap:8px}
+  .mapwrap{flex:1;min-height:200px;height:auto}
+  .maptools{right:6px;top:6px}
+  .maptools{gap:5px}
+  .maptools button{min-width:42px;min-height:38px;font-size:12px;padding:4px 7px}
+  #next{position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 0 var(--panel),0 6px 0 var(--panel)}
+  .maphint{font-size:11px}
+  aside{flex:0 0 auto;max-height:48%;overflow-y:auto;padding:10px 12px;gap:8px;-webkit-overflow-scrolling:touch}
+  .task-kind{font-size:13px}
+  .task-name{font-size:20px}
+  .task-name .ttype{font-size:14px;margin-top:2px}
+  .hint{font-size:14px;padding:6px 9px}
+  .opts{grid-template-columns:1fr 1fr;gap:6px}
+  .opts button{font-size:14px;padding:10px 8px;min-height:48px;line-height:1.25}
+  .opts kbd{display:none}
+  .primary{min-height:46px}
+  .ghost{min-height:40px}
+  .score{padding-top:6px;gap:10px;font-size:13px}
+  .score b{font-size:14px}
+  .note{display:none}
+  .list{padding:4px 10px 24px}
+}
+@media (max-width:860px){.nomap .mapwrap{display:none}.nomap aside{max-height:none;flex:1}}
+@media (max-width:860px) and (max-height:600px){aside{max-height:58%}.mapwrap{min-height:160px}}
+/* Atlas refresh — intentionally no purple gradients. */
+:root{--sea:#d9e9ed;--land:#f8f8f2;--coast:#69939b;--ink:#13313b;--muted:#607981;--panel:#fffefa;--line:#cddbd9;--hl:#e3ad48;--ok:#258e77;--bad:#c75a4b;--btn:#17687a;--btnText:#fff;--c-gulf:#b37c30;--c-strait:#cd6754;--c-island:#3f9071;--c-pen:#ae7354}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sea:#163c49;--land:#223d45;--coast:#739da5;--ink:#ebf4f0;--muted:#b3c9c9;--panel:#193139;--line:#395962;--hl:#e8b85d;--ok:#66bea3;--bad:#f08e7e;--btn:#80c4ce;--btnText:#13313b;--c-gulf:#d6a252;--c-strait:#eb9987;--c-island:#86cfa8;--c-pen:#d8ac7b}}
+:root[data-theme="dark"]{--sea:#163c49;--land:#223d45;--coast:#739da5;--ink:#ebf4f0;--muted:#b3c9c9;--panel:#193139;--line:#395962;--hl:#e8b85d;--ok:#66bea3;--bad:#f08e7e;--btn:#80c4ce;--btnText:#13313b;--c-gulf:#d6a252;--c-strait:#eb9987;--c-island:#86cfa8;--c-pen:#d8ac7b}
+html{box-sizing:border-box;scroll-behavior:smooth}body{background:var(--sea)}
+.app{max-width:1600px;margin:0 auto}header{padding:23px 24px 15px;align-items:center}h1{letter-spacing:-.045em}h1 small{font-size:13px;letter-spacing:.012em;margin-top:8px}
+.modes{padding:5px;background:color-mix(in srgb,var(--panel) 75%,transparent);border:1px solid var(--line);border-radius:15px;gap:3px}
+.modes button{border:1px solid transparent;background:transparent;border-radius:11px;font-weight:500;transition:background .18s,border-color .18s,transform .18s}
+.modes button[aria-pressed="true"]{background:var(--btn);border-color:var(--btn);color:var(--btnText);box-shadow:0 3px 10px #102f3821}
+.modes button:hover:not([aria-pressed="true"]){background:var(--land)}
+.cats{padding:0 24px 16px;gap:8px}.cat{border-radius:12px;padding:9px 12px;background:var(--panel);transition:border-color .16s}.cat:hover{border-color:var(--coast)}
+main{gap:15px;padding:0 16px 18px;grid-template-columns:minmax(0,1fr) minmax(310px,355px)}
+.mapwrap{border:1px solid var(--line);border-radius:19px;box-shadow:0 10px 26px #193b4410;min-height:450px;height:min(70vh,680px)}
+aside{border:1px solid var(--line);border-radius:19px;box-shadow:0 10px 26px #193b4410;padding:22px;gap:16px;min-width:0}
+.task-name{font-size:clamp(19px,2vw,25px);overflow-wrap:anywhere}.hint{border-radius:0 12px 12px 0;line-height:1.5;padding:12px 13px}
+.maptools{right:12px;top:12px;gap:7px}.maptools button{border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:40px;padding:8px 12px;box-shadow:0 2px 6px #0b3c4017}
+.maphint{left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 9px;max-width:calc(100% - 100px)}
+.opts button,.primary,.ghost{border-radius:12px;padding:12px 14px;transition:transform .15s,border-color .15s;background:var(--panel)}
+.opts button:hover:not(:disabled),.primary:hover,.ghost:hover{transform:translateY(-1px)}.primary{background:var(--btn);color:var(--btnText);border-color:var(--btn)}
+.bar{height:9px;border-radius:20px}.bar i{border-radius:20px}.list{max-width:1600px;margin:auto;padding:8px 16px 36px}.list h2{font-size:19px}.list-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:10px}.li{padding:13px;border-radius:13px;background:var(--panel);border:1px solid var(--line);line-height:1.55;transition:border-color .15s}.li:hover{border-color:var(--coast)}
+@media(max-width:860px){
+ html,body{height:auto;min-height:100%;overflow-x:hidden}
+ .app{height:auto;min-height:0;display:block}
+ header{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:18px 14px 12px}
+ h1{font-size:clamp(21px,5.5vw,28px);line-height:1.2}h1 small{display:block;font-size:12px;line-height:1.45;margin-top:6px}
+ .modes{width:100%;padding:4px;border-radius:13px;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:3px;overscroll-behavior-x:contain}
+ .modes button{flex:0 0 auto;font-size:13px;min-height:44px;padding:10px 12px;border-radius:9px}
+ .cats{padding:0 14px 13px;gap:7px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+ .cat{padding:9px 11px;min-height:43px;border-radius:10px;font-size:13px}
+ main{display:flex;flex-direction:column;height:auto;min-height:0;gap:12px;padding:0 10px 16px}
+ .mapwrap{flex:none;width:100%;height:clamp(270px,48svh,540px);min-height:270px;border-radius:16px}
+ aside{flex:none;max-height:none;overflow:visible;padding:18px 15px;gap:12px;border-radius:16px}
+ .maptools{top:8px;right:8px;gap:5px}.maptools button{min-height:41px;min-width:42px;font-size:12px;padding:7px 9px}
+ .maphint{font-size:10px;left:8px;bottom:8px;right:8px;max-width:calc(100% - 16px);width:max-content}
+ .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.opts button{min-width:0;overflow-wrap:anywhere;text-align:left;line-height:1.35;min-height:56px;padding:10px;font-size:14px}
+ .task-name{font-size:21px}.task-name .ttype{font-size:14px}.task-kind{font-size:13px}.hint{font-size:14px}.primary,.ghost{width:100%;min-height:46px}#next{position:static;box-shadow:none}
+ .score{gap:10px 18px}.note{display:block;font-size:12px}.list{padding:6px 10px 35px}.listhead{gap:8px}.listhead .ghost{width:auto;min-height:40px}.list-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
+ .nomap .mapwrap{display:none}.nomap aside{flex:none;max-height:none}
+}
+@media(max-width:380px){.opts{grid-template-columns:1fr}.opts button{min-height:45px}.mapwrap{height:43svh;min-height:250px}.modes button{font-size:12px;padding:10px}}
+@media(max-height:460px) and (orientation:landscape) and (max-width:860px){.mapwrap{height:70svh;min-height:220px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>Гидросфера на карте<small>Моря, заливы, проливы, острова и полуострова для 6 класса</small></h1>
+  <div class="modes" role="group" aria-label="Режим">
+    <button data-mode="study" aria-pressed="true">Учить</button>
+    <button data-mode="find" aria-pressed="false">Найди на карте</button>
+    <button data-mode="what" aria-pressed="false">Что это?</button>
+    <button data-mode="desc" aria-pressed="false">По описанию</button>
+  </div>
+</header>
+<div class="cats" id="cats"></div>
+<main>
+  <div class="mapwrap">
+    <div id="map"></div>
+    <div class="maptools">
+      <button id="zin" type="button" aria-label="Приблизить">+</button>
+      <button id="zout" type="button" aria-label="Отдалить">−</button>
+      <button id="btnWorld" type="button">Весь мир</button>
+      <button id="btnLabels" type="button" aria-pressed="false">Подписи</button>
+    </div>
+    <div class="maphint" id="maphint">Колёсико, два пальца или кнопки «+ −» — приблизить</div>
+    <div class="maperr" id="maperr"><div><b>Карта не загрузилась.</b><br>Проверь интернет и обнови страницу. Пока можно тренироваться в режиме «По описанию».</div></div>
+  </div>
+  <aside id="panel" aria-live="polite"></aside>
+</main>
+</div>
+<section class="list">
+  <div class="listhead"><h2>Все объекты</h2><button class="ghost" id="reset">Сбросить прогресс</button></div>
+  <div class="list-grid" id="list"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+<script>
+const CATS={
+  sea:{name:"Моря",one:"море",color:"--c-sea"},
+  gulf:{name:"Заливы",one:"залив",color:"--c-gulf"},
+  strait:{name:"Проливы",one:"пролив",color:"--c-strait"},
+  island:{name:"Острова",one:"остров(а)",color:"--c-island"},
+  pen:{name:"Полуострова",one:"полуостров",color:"--c-pen"}
+};
+// [название, категория, долгота, широта, радиус засчитывания (км), подсказка]
+const RAW=[
+["Саргассово","sea",-55,28,1500,"Атлантический океан. «Море без берегов» — у него нет суши вокруг, только течения. Восточнее Северной Америки."],
+["Карибское","sea",-75,15,1100,"Атлантический океан. Между Южной и Центральной Америкой и Большими Антильскими островами."],
+["Бофорта","sea",-140,72,900,"Северный Ледовитый океан. Севернее Аляски и Канады."],
+["Северное","sea",3,56,600,"Атлантический океан. Между Великобританией и Скандинавским полуостровом."],
+["Балтийское","sea",19,57,550,"Атлантический океан, внутреннее море. Между Скандинавией и материковой Европой."],
+["Баренцево","sea",40,73,900,"Северный Ледовитый океан. Севернее Скандинавии и Кольского полуострова, порт Мурманск."],
+["Белое","sea",38,65.5,350,"Северный Ледовитый океан. Глубоко врезается в сушу России, порт Архангельск."],
+["Чёрное","sea",34,43.3,500,"Атлантический океан, внутреннее море. Между Европой и Малой Азией, омывает Крым."],
+["Красное","sea",38.5,20,600,"Индийский океан. Узкое море между Африкой и Аравийским полуостровом."],
+["Берингово","sea",-178,58,1000,"Тихий океан. Самое северное в Тихом океане, между Камчаткой, Чукоткой и Аляской."],
+["Филиппинское","sea",133,20,1300,"Тихий океан. Восточнее Филиппин и южнее Японии, самое большое море в мире."],
+["Жёлтое","sea",123,36,450,"Тихий океан. Между Китаем и Корейским полуостровом."],
+["Восточно-Китайское","sea",125,29,550,"Тихий океан. Южнее Жёлтого моря, между Китаем и Японскими островами."],
+["Гудзонов","gulf",-85,60,900,"Огромный залив, глубоко врезанный в сушу Канады (Северная Америка)."],
+["Мексиканский","gulf",-90,25,900,"Атлантический океан. Между полуостровом Флорида, США и Мексикой."],
+["Бискайский","gulf",-5,45.5,400,"Атлантический океан. Между Францией и Пиренейским полуостровом."],
+["Финский","gulf",26,59.8,250,"Восточная часть Балтийского моря, в его вершине Санкт-Петербург."],
+["Ботнический","gulf",20,62.5,400,"Северная часть Балтийского моря, между Швецией и Финляндией."],
+["Гвинейский","gulf",2,2,900,"Атлантический океан. Под «выступом» Африки, где пересекаются экватор и нулевой меридиан."],
+["Персидский","gulf",51,27,500,"Индийский океан. Между Аравийским полуостровом и Ираном."],
+["Бенгальский","gulf",88,15,900,"Индийский океан. Восточнее полуострова Индостан."],
+["Сиамский (Таиландский)","gulf",101.5,10,450,"Тихий океан (Южно-Китайское море). Между полуостровами Индокитай и Малакка."],
+["Большой Австралийский","gulf",130,-35,1100,"Индийский океан. Вдоль южного берега Австралии."],
+["Аденский","gulf",48,12.5,450,"Индийский океан. Между Аравийским полуостровом и полуостровом Сомали."],
+["Карпентария","gulf",140,-14,450,"Север Австралии, «вырез» в материке между двумя полуостровами."],
+["Калифорнийский","gulf",-111,28.5,400,"Тихий океан. Между полуостровом Калифорния и материком Северная Америка (Мексика)."],
+["Дрейка","strait",-65,-58,700,"Самый широкий пролив Земли. Между Южной Америкой (Огненной Землёй) и Антарктидой."],
+["Магелланов","strait",-71,-53.5,350,"Между материком Южная Америка и островом Огненная Земля."],
+["Мозамбикский","strait",41,-18,600,"Самый длинный пролив. Между Африкой и островом Мадагаскар."],
+["Гибралтарский","strait",-5.6,36,300,"Между Европой (Пиренейский полуостров) и Африкой. Соединяет Средиземное море и Атлантику."],
+["Босфор","strait",29.05,41.15,200,"Соединяет Чёрное и Мраморное моря, на берегах Стамбул. Отделяет Европу от Азии."],
+["Дарданеллы","strait",26.4,40.2,200,"Соединяет Мраморное и Эгейское (Средиземное) моря. Чуть юго-западнее Босфора."],
+["Ла-Манш","strait",-1,50.2,350,"Между островом Великобритания и Францией."],
+["Малаккский","strait",100,3.2,400,"Между полуостровом Малакка и островом Суматра."],
+["Берингов","strait",-169,65.8,400,"Между Евразией (Чукотка) и Северной Америкой (Аляска). Соединяет Тихий и Северный Ледовитый океаны."],
+["Баб-эль-Мандебский","strait",43.4,12.6,250,"Между Аравийским полуостровом и Африкой. Соединяет Красное море и Аденский залив."],
+["Девисов","strait",-58,66,550,"Между островами Гренландия и Баффинова Земля."],
+["Гренландия","island",-41,72,1500,"Самый большой остров Земли. Северо-восточнее Северной Америки."],
+["Исландия","island",-19,65,400,"Атлантический океан. Между Гренландией и Скандинавией, остров вулканов и гейзеров."],
+["Ирландия","island",-8,53.3,300,"Западнее острова Великобритания."],
+["Великобритания","island",-2,53.5,500,"Северо-западнее материковой Европы, отделена проливом Ла-Манш."],
+["Большие Антильские (Куба)","island",-79,21.5,800,"Между Карибским морем и Мексиканским заливом. Самый большой из них — Куба."],
+["Огненная Земля","island",-68.5,-54,400,"Южная оконечность Южной Америки, за Магеллановым проливом."],
+["Мадагаскар","island",46.8,-19,700,"Восточнее Африки, за Мозамбикским проливом."],
+["Шри-Ланка","island",80.7,7.8,300,"Индийский океан. У южного кончика полуострова Индостан."],
+["Большие Зондские (Ява, Суматра, Калимантан)","island",108,-1,1600,"Юго-Восточная Азия, на экваторе между Индийским и Тихим океанами."],
+["Новая Зеландия","island",172,-41,900,"Тихий океан. Юго-восточнее Австралии, два больших острова."],
+["Сахалин","island",143,50,500,"Россия. У восточного берега Евразии, севернее Японии."],
+["Баффинова Земля","island",-72,69,800,"Канада. Между Гренландией и материком Северная Америка."],
+["Тасмания","island",146.6,-42,350,"Южнее Австралии."],
+["Гавайские","island",-157,20.5,700,"Посреди Тихого океана, далеко от всех материков."],
+["Японские","island",138,36.5,1000,"Восточнее Евразии, между Японским морем и Тихим океаном."],
+["Лабрадор","pen",-62,54,900,"Северо-восток Северной Америки, восточнее Гудзонова залива."],
+["Аляска","pen",-152,64,1000,"Северо-запад Северной Америки, напротив Чукотки."],
+["Флорида","pen",-81.5,28,400,"Юго-восток США, между Атлантикой и Мексиканским заливом."],
+["Калифорния","pen",-113.5,28.5,450,"Запад Северной Америки (Мексика), длинный узкий полуостров между Тихим океаном и Калифорнийским заливом."],
+["Сомали","pen",47,8,800,"Восток Африки, «Африканский рог», южнее Аденского залива."],
+["Пиренейский","pen",-4,40,600,"Юго-запад Европы: Испания и Португалия."],
+["Скандинавский","pen",15,64,1000,"Север Европы: Норвегия и Швеция. Самый большой полуостров Европы."],
+["Апеннинский","pen",13,42.5,450,"Юг Европы, «сапог» — Италия."],
+["Балканский","pen",23,42,500,"Юго-восток Европы, между Адриатическим и Чёрным морями."],
+["Малая Азия","pen",33,39,600,"Между Чёрным и Средиземным морями, Турция."],
+["Камчатка","pen",159,56,600,"Восток России, полуостров вулканов между Охотским и Беринговым морями."],
+["Индокитай","pen",103,15,900,"Юго-Восточная Азия, восточнее Бенгальского залива."],
+["Индостан","pen",78,20,1100,"Юг Азии, Индия, полуостров-«треугольник» между Аравийским морем и Бенгальским заливом."],
+["Аравийский","pen",45,23,1300,"Юго-запад Азии, самый большой полуостров в мире. Между Красным морем и Персидским заливом."],
+["Малакка","pen",101.5,4.5,500,"Самый южный выступ Евразии, южнее Индокитая."],
+["Таймыр","pen",100,75,700,"Самый северный полуостров Евразии, Россия."],
+["Крым","pen",34,45,250,"Между Чёрным и Азовским морями."]
+];
+const ITEMS=RAW.map((r,i)=>({id:i,name:r[0],cat:r[1],lon:r[2],lat:r[3],r:r[4],hint:r[5]}));
+
+// ---------- state ----------
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let prog=store.get("hydro-prog",{}); // id -> {s:streak,w:wrong,c:correct}
+let selCats=store.get("hydro-cats",Object.keys(CATS));
+let mode="study", cur=null, answered=false, session={ok:0,all:0}, showLabels=false, lastId=null, studyPick=null, lastClick=null;
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const learned=it=>(prog[it.id]?.s||0)>=2;
+const pool=()=>ITEMS.filter(it=>selCats.includes(it.cat));
+const typeLabel=it=>CATS[it.cat].one;
+
+// ---------- categories ----------
+function renderCats(){
+  $("#cats").innerHTML=Object.entries(CATS).map(([k,c])=>{
+    const all=ITEMS.filter(i=>i.cat===k), l=all.filter(learned).length;
+    return `<label class="cat"><input type="checkbox" value="${k}" ${selCats.includes(k)?"checked":""}><span class="dot" style="background:var(${c.color})"></span>${c.name} <span class="cnt">${l}/${all.length}</span></label>`;
+  }).join("");
+  $("#cats").querySelectorAll("input").forEach(cb=>cb.onchange=()=>{
+    selCats=[...$("#cats").querySelectorAll("input:checked")].map(x=>x.value);
+    if(!selCats.length){cb.checked=true;selCats=[cb.value]}
+    store.set("hydro-cats",selCats);renderList();newTask();
+  });
+}
+function renderList(){
+  $("#list").innerHTML=pool().map(it=>`<div class="li ${learned(it)?"learned":""}" tabindex="0" data-id="${it.id}"><b><span class="dot" style="background:var(${CATS[it.cat].color})"></span> ${it.name} <span>— ${typeLabel(it)}</span></b>${it.hint}</div>`).join("");
+  $("#list").querySelectorAll(".li").forEach(el=>{const go=()=>{setMode("study");studyPick=ITEMS[+el.dataset.id];renderStudy();focusOn(studyPick,true);window.scrollTo({top:0,behavior:"smooth"})};el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter")go()}});
+}
+
+// ---------- map ----------
+let chart=null, mapOK=false, downPt=null;
+const WORLD={center:[15,20],zoom:1.15};
+function geoStyle(){return{map:"world",roam:true,scaleLimit:{min:1,max:40},center:WORLD.center,zoom:WORLD.zoom,silent:true,
+  itemStyle:{areaColor:css("--land"),borderColor:css("--coast"),borderWidth:.7},label:{show:false}}}
+function initMap(){
+  try{
+    if(!window.echarts||!echarts.getMap||!echarts.getMap("world"))throw 0;
+    chart=echarts.init($("#map"));mapOK=true;
+    chart.setOption({backgroundColor:"transparent",geo:geoStyle(),series:[]});
+    const zr=chart.getZr();
+    zr.on("mousedown",e=>{downPt=[e.offsetX,e.offsetY]});
+    zr.on("click",e=>{if(downPt&&Math.hypot(e.offsetX-downPt[0],e.offsetY-downPt[1])>6)return;onMapClick(e.offsetX,e.offsetY)});
+    chart.on("click",p=>{if(mode==="study"&&p.data&&p.data.id!=null){studyPick=ITEMS[p.data.id];renderStudy();drawStudy()}});
+    window.addEventListener("resize",()=>chart.resize());
+    if(window.ResizeObserver)new ResizeObserver(()=>chart.resize()).observe($("#map"));
+  }catch(e){mapOK=false;document.body.classList.add("nomap");$("#maperr").style.display="flex";$("#maphint").style.display="none";document.querySelectorAll('[data-mode="find"],[data-mode="what"]').forEach(b=>b.disabled=true);}
+}
+function resetSeries(series){if(!mapOK)return;const o=chart.getOption();chart.setOption({backgroundColor:"transparent",geo:{...geoStyle(),center:o.geo[0].center,zoom:o.geo[0].zoom},series},true)}
+function world(){if(!mapOK)return;chart.setOption({geo:{center:WORLD.center,zoom:WORLD.zoom}})}
+function focusOn(it,soft){if(!mapOK)return;const z={strait:soft?5:6,gulf:3.2,sea:2.6,island:2.6,pen:2.8}[it.cat];chart.setOption({geo:{center:[it.lon,it.lat],zoom:it.r>1200?2:z}})}
+const pt=(it,size,color,label)=>({id:it.id,name:it.name,value:[it.lon,it.lat],symbolSize:size,itemStyle:{color,borderColor:css("--land"),borderWidth:1.5},label:{show:!!label,formatter:"{b}",position:"right",color:css("--ink"),fontSize:12,fontFamily:"Rubik",textBorderColor:css("--land"),textBorderWidth:3}});
+function drawStudy(){
+  if(!mapOK)return;
+  const data=pool().map(it=>pt(it,studyPick&&studyPick.id===it.id?16:10,css(CATS[it.cat].color),showLabels||(studyPick&&studyPick.id===it.id)));
+  resetSeries([{type:"scatter",coordinateSystem:"geo",data,zlevel:2}]);
+}
+function km(a,b){const R=6371,t=Math.PI/180,dl=(b[1]-a[1])*t,dn=(b[0]-a[0])*t;const h=Math.sin(dl/2)**2+Math.cos(a[1]*t)*Math.cos(b[1]*t)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function onMapClick(x,y){
+  if(mode!=="find"||answered||!cur)return;
+  const c=chart.convertFromPixel({geoIndex:0},[x,y]);if(!c)return;
+  lastClick=c;
+  const same=ITEMS.filter(i=>i.cat===cur.cat);
+  let near=same[0],nd=1e9;same.forEach(i=>{const d=km(c,[i.lon,i.lat]);if(d<nd){nd=d;near=i}});
+  const d=km(c,[cur.lon,cur.lat]);
+  const ok=near.id===cur.id&&d<=cur.r;
+  finish(ok, ok?null:(near.id!==cur.id&&km(c,[near.lon,near.lat])<=near.r?`Ты показал: ${near.name}`:`Мимо примерно на ${Math.round(d/10)*10} км`));
+  const series=[{type:"scatter",coordinateSystem:"geo",zlevel:2,data:[pt(cur,18,css("--ok"),true)]},
+    {type:"scatter",coordinateSystem:"geo",zlevel:3,symbol:"pin",symbolSize:26,data:[{value:c,itemStyle:{color:ok?css("--ok"):css("--bad")}}]}];
+  resetSeries(series);
+}
+
+// ---------- tasks ----------
+function pick(){
+  const p=pool();let w=p.map(it=>{const s=prog[it.id]||{};return Math.max(.3,1+3*(s.w||0)-1.5*(s.s||0))*(it.id===lastId?0:1)});
+  let t=w.reduce((a,b)=>a+b,0)*Math.random();for(let i=0;i<p.length;i++){t-=w[i];if(t<=0)return p[i]}return p[0];
+}
+function options(it){
+  const same=ITEMS.filter(i=>i.cat===it.cat&&i.id!==it.id).sort(()=>Math.random()-.5).slice(0,3);
+  return [it,...same].sort(()=>Math.random()-.5);
+}
+function newTask(){
+  answered=false;lastClick=null;
+  if(mode==="study"){studyPick=studyPick&&selCats.includes(studyPick.cat)?studyPick:null;renderStudy();drawStudy();return}
+  cur=pick();lastId=cur.id;
+  if(mode==="find"){world();resetSeries([]);world()}
+  if(mode==="what"){focusOn(cur);resetSeries([{type:"effectScatter",coordinateSystem:"geo",zlevel:2,rippleEffect:{scale:3.2,brushType:"stroke"},data:[pt(cur,14,css("--hl"),false)]}]);focusOn(cur)}
+  if(mode==="desc"&&mapOK){resetSeries([])}
+  renderTask();
+}
+function finish(ok,note){
+  answered=true;session.all++;if(ok)session.ok++;
+  if(!ok&&navigator.vibrate){try{navigator.vibrate(60)}catch(e){}}
+  const s=prog[cur.id]||{s:0,w:0,c:0};
+  if(ok){s.s++;s.c++;s.w=Math.max(0,s.w-1)}else{s.s=0;s.w++}
+  prog[cur.id]=s;store.set("hydro-prog",prog);
+  renderTask(ok,note);renderCats();renderList();
+}
+function renderTask(ok,note){
+  const P=$("#panel"), it=cur;
+  const head={find:"Покажи на карте:",what:"Что отмечено на карте?",desc:"Что это за объект?"}[mode];
+  let h=answered?`<div class="verdict ${ok?"ok":"bad"}">${ok?"Верно!":"Не то."} ${note?`<span style="font-weight:400;color:var(--muted)">${note}</span>`:""}</div>`:`<div class="task-kind">${head}</div>`;
+  if(mode==="find")h+=`<p class="task-name">${it.name}<span class="ttype" style="color:var(${CATS[it.cat].color})">${typeLabel(it)}</span></p>`;
+  if(mode==="what")h+=`<p class="task-name" style="font-size:18px"><span class="ttype" style="color:var(${CATS[it.cat].color});margin:0">Это ${typeLabel(it)}</span></p>`;
+  if(mode==="desc")h+=`<div class="hint">${it.hint}</div><div class="task-name" style="font-size:16px"><span class="ttype" style="color:var(${CATS[it.cat].color});margin:0">Это ${typeLabel(it)}</span></div>`;
+  if(mode==="what"||mode==="desc"){
+    if(!it._opts){it._opts=options(it);it._opts.forEach(x=>x._chosen=false)}
+    h+=`<div class="opts">${it._opts.map((o,i)=>`<button data-id="${o.id}" ${answered?"disabled":""} class="${answered?(o.id===it.id?"ok":(o._chosen?"bad":"")):""}"><kbd>${i+1}</kbd> ${o.name}</button>`).join("")}</div>`;
+  }
+  if(mode==="find"&&!answered)h+=`<div class="task-kind">Нажми на карте место, где находится этот объект. Мелкие проливы удобнее искать, если приблизить карту.</div>`;
+  if(answered&&it._opts&&mode==="what")h+=`<p class="task-name" style="font-size:22px">${it.name}</p>`;
+  if(answered){
+    if(mode!=="desc")h+=`<div class="hint"><b>${it.name}</b> — ${typeLabel(it)}. ${it.hint}</div>`;
+    h+=`<button class="primary" id="next">Дальше</button>`;
+    if(mode==="find"&&!ok)h+=`<button class="ghost" id="show">Приблизить к правильному месту</button>`;
+  }else h+=`<button class="ghost" id="skip">Не знаю, покажи ответ</button>`;
+  h+=scoreHtml();
+  P.innerHTML=h;P.scrollTop=0;
+  P.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{if(answered)return;const o=ITEMS[+b.dataset.id];it._opts.forEach(x=>x._chosen=x.id===o.id);const good=o.id===it.id;
+    finish(good,good?null:`Это не ${o.name}`);
+    if(mapOK&&mode==="desc"){resetSeries([{type:"scatter",coordinateSystem:"geo",zlevel:2,data:[pt(it,18,css("--ok"),true)]}]);focusOn(it,true)}
+    if(mapOK&&mode==="what"){resetSeries([{type:"scatter",coordinateSystem:"geo",zlevel:2,data:[pt(it,16,css("--ok"),true)]}])}
+  });
+  const n=$("#next");if(n){n.onclick=()=>{cur._opts=null;newTask()};n.focus({preventScroll:true})}
+  const sh=$("#show");if(sh)sh.onclick=()=>focusOn(it,true);
+  const sk=$("#skip");if(sk)sk.onclick=()=>{if(it._opts)it._opts.forEach(x=>x._chosen=false);finish(false,"Запомни, где он.");if(mapOK){resetSeries([{type:"scatter",coordinateSystem:"geo",zlevel:2,data:[pt(it,18,css("--ok"),true)]}]);focusOn(it,true)}};
+}
+function scoreHtml(){
+  const p=pool(),l=p.filter(learned).length;
+  return `<div class="score"><span>Сейчас: <b>${session.ok}</b> из <b>${session.all}</b></span><span>Выучено: <b>${l}</b> из <b>${p.length}</b></span></div><div class="bar"><i style="width:${p.length?l/p.length*100:0}%"></i></div><div class="task-kind note">Объект считается выученным после двух верных ответов подряд.</div>`;
+}
+function renderStudy(){
+  const P=$("#panel");let h="";
+  if(studyPick){const it=studyPick;h+=`<div class="task-kind" style="color:var(${CATS[it.cat].color})">${typeLabel(it)}</div><p class="task-name">${it.name}</p><div class="hint">${it.hint}</div><button class="ghost" id="zoomit">Приблизить</button>`}
+  else h+=`<div class="task-kind">Как учить</div><p class="task-name" style="font-size:20px">Нажимай на точки на карте</p><div class="hint">Цвет точки показывает тип объекта. Нажми на точку — увидишь название и подсказку, где он находится. Кнопка «Подписи» включает все названия сразу. Когда освоишься, переходи в «Найди на карте».</div>`;
+  h+=`<button class="primary" id="go">Проверить себя</button>`+scoreHtml();
+  P.innerHTML=h;P.scrollTop=0;
+  $("#go").onclick=()=>setMode(mapOK?"find":"desc");
+  const z=$("#zoomit");if(z)z.onclick=()=>focusOn(studyPick,true);
+}
+function bindReset(){const r=$("#reset");if(r)r.onclick=()=>{if(confirm("Сбросить прогресс по всем объектам?")){prog={};store.set("hydro-prog",prog);session={ok:0,all:0};renderCats();renderList();newTask()}}}
+
+function setMode(m){
+  if(!mapOK&&(m==="find"||m==="what"))m="desc";
+  mode=m;document.querySelectorAll(".modes button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===m));
+  $("#btnLabels").style.display=m==="study"?"":"none";
+  if(cur)cur._opts=null;newTask();
+}
+document.querySelectorAll(".modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$("#btnWorld").onclick=world;
+function zoomBy(f){if(!mapOK)return;const o=chart.getOption().geo[0];chart.setOption({geo:{zoom:Math.min(40,Math.max(1,(o.zoom||1)*f))}})}
+$("#zin").onclick=()=>zoomBy(1.7);$("#zout").onclick=()=>zoomBy(1/1.7);
+bindReset();
+$("#btnLabels").onclick=e=>{showLabels=!showLabels;e.currentTarget.setAttribute("aria-pressed",showLabels);e.currentTarget.textContent=showLabels?"Без подписей":"Подписи";drawStudy()};
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(e.key==="Enter"&&answered&&$("#next")){e.preventDefault();$("#next").click()}
+  if(/^[1-4]$/.test(e.key)&&!answered){const b=document.querySelectorAll(".opts button")[+e.key-1];if(b)b.click()}
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(mapOK){chart.setOption({geo:geoStyle()});newTask()}});
+
+initMap();renderCats();renderList();setMode("study");
+</script>
+</body>
+</html>
