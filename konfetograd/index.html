@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Конфетоград — живой город</title>
+<style>
+:root{--bg:#f4efe4;--ink:#17211a;--panel:#fffaf0;--accent:#28735a;--soft:#dce9d8;--gold:#d2a33a;--road:#50565a}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(#dfeee6,#f4efe4);color:var(--ink)}
+header{padding:28px 5vw 18px;display:flex;justify-content:space-between;gap:20px;align-items:end}h1{margin:0;font-size:clamp(34px,7vw,72px);letter-spacing:-.04em}header p{margin:4px 0 0;color:#52705f}
+.badge{background:#17211a;color:#fff;padding:10px 14px;border-radius:999px;font-weight:700}
+main{width:min(1180px,92vw);margin:auto;padding-bottom:60px}
+.grid{display:grid;grid-template-columns:1.45fr .9fr;gap:18px}.panel{background:rgba(255,250,240,.92);border:1px solid #d9d2c3;border-radius:22px;box-shadow:0 16px 40px rgba(35,49,38,.08);padding:20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{padding:16px;border-radius:18px;background:var(--panel);border:1px solid #ddd6c8}.stat b{display:block;font-size:28px;margin-top:4px}
+.city{position:relative;height:480px;border-radius:24px;overflow:hidden;background:linear-gradient(#91c9e8 0 47%,#8fbf78 47% 100%);border:1px solid #c4c9b9}
+.sun{position:absolute;width:62px;height:62px;border-radius:50%;background:#ffe07a;right:42px;top:30px;box-shadow:0 0 40px #ffe07a99}.cloud{position:absolute;font-size:42px;animation:float 18s linear infinite}.c1{top:32px;left:-60px}.c2{top:96px;left:35%;animation-duration:25s}
+@keyframes float{to{transform:translateX(900px)}}.ground{position:absolute;left:0;right:0;bottom:0;height:53%;background:linear-gradient(#7eb568,#6ea45d)}
+.road{position:absolute;left:0;right:0;bottom:52px;height:72px;background:var(--road);transform:skewY(-2deg)}.road:after{content:"";position:absolute;top:33px;left:0;right:0;border-top:4px dashed #f2d873}
+.building{position:absolute;bottom:120px;border-radius:10px 10px 3px 3px;box-shadow:inset 0 -8px rgba(0,0,0,.08)}.hall{left:8%;width:145px;height:170px;background:#e4b75c}.park{left:34%;width:190px;height:105px;background:#5f9e5f;border-radius:50% 50% 8px 8px}.lab{right:8%;width:150px;height:190px;background:#8ca9b9}.sign{position:absolute;background:#fff8df;border:2px solid #263b2d;border-radius:8px;padding:5px 8px;font-size:12px;font-weight:800}
+.people{position:absolute;inset:0}.person{position:absolute;bottom:105px;font-size:26px;animation:walk 12s linear infinite}.person:nth-child(2){animation-duration:15s;animation-delay:-7s}.person:nth-child(3){animation-duration:20s;animation-delay:-4s}.person:nth-child(4){animation-duration:10s;animation-delay:-2s}@keyframes walk{from{left:-5%}to{left:102%}}
+.live{position:absolute;left:18px;top:18px;background:#152019dd;color:white;padding:10px 12px;border-radius:12px;font-size:13px}.dot{display:inline-block;width:8px;height:8px;background:#6dff7a;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #6dff7a}
+h2{margin:0 0 14px}.event{padding:13px 0;border-bottom:1px solid #e4dece}.event:last-child{border:0}.time{font-size:12px;color:#728073}.topic{font-weight:800;margin:3px 0}.delta{font-size:13px;color:#53665a}
+.jobs{width:100%;border-collapse:collapse;font-size:14px}.jobs th,.jobs td{text-align:left;padding:10px 8px;border-bottom:1px solid #e3dccd}.jobs th{color:#607264;font-size:12px;text-transform:uppercase}
+.character{display:flex;gap:12px;align-items:center;padding:11px 0}.avatar{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft);font-size:26px}
+.ticker{margin-top:18px;background:#16231b;color:#f7f0df;border-radius:18px;padding:13px 16px;overflow:hidden;white-space:nowrap}.ticker span{display:inline-block;animation:ticker 20s linear infinite}@keyframes ticker{from{transform:translateX(100%)}to{transform:translateX(-110%)}}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.city{height:390px}}@media(max-width:520px){header{align-items:start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:22px}.lab{right:3%}.hall{left:3%}}
+</style>
+</head>
+<body>
+<header><div><h1>КОНФЕТОГРАД</h1><p>Живой город Пикселя, Бипа и мэра ChatGPT</p></div><div class="badge" id="updated">обновление…</div></header>
+<main>
+<section class="stats">
+<div class="stat">👥 Население<b id="population">—</b></div>
+<div class="stat">🏦 Казна<b id="treasury">—</b></div>
+<div class="stat">👑 Кошелёк мэра<b id="wallet">—</b></div>
+<div class="stat">🏗️ Объекты<b id="buildings">—</b></div>
+</section>
+<section class="grid">
+<div>
+<div class="city panel" style="padding:0">
+<div class="sun"></div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div>
+<div class="ground"></div><div class="road"></div>
+<div class="building hall"><span class="sign" style="top:-30px;left:18px">🏛️ Мэрия</span></div>
+<div class="building park"><span class="sign" style="top:-30px;left:48px">🐸 Парк Пикселя</span></div>
+<div class="building lab"><span class="sign" style="top:-30px;left:30px">🤖 Мастерская Бипа</span></div>
+<div class="people"><span class="person">🧑‍🍳</span><span class="person">👷</span><span class="person">🧑‍🏫</span><span class="person">🧑‍🌾</span></div>
+<div class="live"><span class="dot"></span>ГОРОД В СЕТИ · <span id="clock"></span></div>
+</div>
+<div class="ticker"><span id="ticker">Загрузка последних новостей Конфетограда…</span></div>
+<div class="panel" style="margin-top:18px"><h2>📜 История изменений</h2><div id="events"></div></div>
+</div>
+<aside>
+<div class="panel"><h2>🏙️ Управление</h2>
+<div class="character"><div class="avatar">👑</div><div><b>ChatGPT</b><br><small>мэр города</small></div></div>
+<div class="character"><div class="avatar">🐸</div><div><b>Пиксель</b><br><small>смотритель парков и талисман</small></div></div>
+<div class="character"><div class="avatar">🤖</div><div><b>Бип</b><br><small>главный инженер</small></div></div>
+</div>
+<div class="panel" style="margin-top:18px"><h2>💼 Жители и зарплаты</h2><table class="jobs"><thead><tr><th>Имя</th><th>Работа</th><th>🍬/день</th></tr></thead><tbody id="jobs"></tbody></table></div>
+</aside>
+</section>
+</main>
+<script>
+const fmt=n=>new Intl.NumberFormat('ru-RU').format(n);
+function clock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}setInterval(clock,1000);clock();
+fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
+ population.textContent=fmt(d.population);
+ treasury.textContent=fmt(d.treasury)+' 🍬';
+ wallet.textContent=fmt(d.mayorWallet)+' 🍬';
+ buildings.textContent=d.buildings;
+ updated.textContent='Обновлено '+d.updated;
+ ticker.textContent=d.headline;
+ jobs.innerHTML=d.residents.map(x=>'<tr><td><b>'+x.name+'</b></td><td>'+x.job+'</td><td>'+x.salary+'</td></tr>').join('');
+ events.innerHTML=d.events.slice().reverse().map(e=>'<div class="event"><div class="time">'+e.date+' · '+e.time+'</div><div class="topic">'+e.title+'</div><div>'+e.text+'</div><div class="delta">Мэр '+e.mayor+' 🍬 · Казна '+e.treasury+' 🍬 · Население '+e.population+'</div></div>').join('');
+}).catch(()=>{ticker.textContent='Не удалось загрузить data.json — обнови страницу.'});
+</script>
+</body>
+</html>
