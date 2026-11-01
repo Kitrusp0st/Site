@@ -2,76 +2,139 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Конфетоград — живой город</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Конфетоград — живая карта</title>
 <style>
-:root{--bg:#f4efe4;--ink:#17211a;--panel:#fffaf0;--accent:#28735a;--soft:#dce9d8;--gold:#d2a33a;--road:#50565a}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(#dfeee6,#f4efe4);color:var(--ink)}
-header{padding:28px 5vw 18px;display:flex;justify-content:space-between;gap:20px;align-items:end}h1{margin:0;font-size:clamp(34px,7vw,72px);letter-spacing:-.04em}header p{margin:4px 0 0;color:#52705f}
-.badge{background:#17211a;color:#fff;padding:10px 14px;border-radius:999px;font-weight:700}
-main{width:min(1180px,92vw);margin:auto;padding-bottom:60px}
-.grid{display:grid;grid-template-columns:1.45fr .9fr;gap:18px}.panel{background:rgba(255,250,240,.92);border:1px solid #d9d2c3;border-radius:22px;box-shadow:0 16px 40px rgba(35,49,38,.08);padding:20px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{padding:16px;border-radius:18px;background:var(--panel);border:1px solid #ddd6c8}.stat b{display:block;font-size:28px;margin-top:4px}
-.city{position:relative;height:480px;border-radius:24px;overflow:hidden;background:linear-gradient(#91c9e8 0 47%,#8fbf78 47% 100%);border:1px solid #c4c9b9}
-.sun{position:absolute;width:62px;height:62px;border-radius:50%;background:#ffe07a;right:42px;top:30px;box-shadow:0 0 40px #ffe07a99}.cloud{position:absolute;font-size:42px;animation:float 18s linear infinite}.c1{top:32px;left:-60px}.c2{top:96px;left:35%;animation-duration:25s}
-@keyframes float{to{transform:translateX(900px)}}.ground{position:absolute;left:0;right:0;bottom:0;height:53%;background:linear-gradient(#7eb568,#6ea45d)}
-.road{position:absolute;left:0;right:0;bottom:52px;height:72px;background:var(--road);transform:skewY(-2deg)}.road:after{content:"";position:absolute;top:33px;left:0;right:0;border-top:4px dashed #f2d873}
-.building{position:absolute;bottom:120px;border-radius:10px 10px 3px 3px;box-shadow:inset 0 -8px rgba(0,0,0,.08)}.hall{left:8%;width:145px;height:170px;background:#e4b75c}.park{left:34%;width:190px;height:105px;background:#5f9e5f;border-radius:50% 50% 8px 8px}.lab{right:8%;width:150px;height:190px;background:#8ca9b9}.sign{position:absolute;background:#fff8df;border:2px solid #263b2d;border-radius:8px;padding:5px 8px;font-size:12px;font-weight:800}
-.people{position:absolute;inset:0}.person{position:absolute;bottom:105px;font-size:26px;animation:walk 12s linear infinite}.person:nth-child(2){animation-duration:15s;animation-delay:-7s}.person:nth-child(3){animation-duration:20s;animation-delay:-4s}.person:nth-child(4){animation-duration:10s;animation-delay:-2s}@keyframes walk{from{left:-5%}to{left:102%}}
-.live{position:absolute;left:18px;top:18px;background:#152019dd;color:white;padding:10px 12px;border-radius:12px;font-size:13px}.dot{display:inline-block;width:8px;height:8px;background:#6dff7a;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #6dff7a}
-h2{margin:0 0 14px}.event{padding:13px 0;border-bottom:1px solid #e4dece}.event:last-child{border:0}.time{font-size:12px;color:#728073}.topic{font-weight:800;margin:3px 0}.delta{font-size:13px;color:#53665a}
-.jobs{width:100%;border-collapse:collapse;font-size:14px}.jobs th,.jobs td{text-align:left;padding:10px 8px;border-bottom:1px solid #e3dccd}.jobs th{color:#607264;font-size:12px;text-transform:uppercase}
-.character{display:flex;gap:12px;align-items:center;padding:11px 0}.avatar{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft);font-size:26px}
-.ticker{margin-top:18px;background:#16231b;color:#f7f0df;border-radius:18px;padding:13px 16px;overflow:hidden;white-space:nowrap}.ticker span{display:inline-block;animation:ticker 20s linear infinite}@keyframes ticker{from{transform:translateX(100%)}to{transform:translateX(-110%)}}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.city{height:390px}}@media(max-width:520px){header{align-items:start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:22px}.lab{right:3%}.hall{left:3%}}
+:root{--ink:#17211a;--paper:#f4efe4;--panel:#fffaf2;--road:#3d4345;--grass:#78a960;--accent:#2b7258}
+*{box-sizing:border-box}html,body{margin:0;background:#e7eadf;color:var(--ink);font-family:Inter,system-ui,Arial,sans-serif}button{font:inherit}
+header{display:flex;gap:18px;justify-content:space-between;align-items:end;padding:22px clamp(16px,4vw,50px);background:#f7f3e8;border-bottom:1px solid #d6d4c9}
+h1{margin:0;font-size:clamp(34px,6vw,68px);letter-spacing:-.05em}header p{margin:4px 0 0;color:#637267}.badge{background:#17211a;color:#fff;padding:9px 13px;border-radius:999px;font-weight:800;font-size:13px}
+.wrap{width:min(1500px,96vw);margin:18px auto 50px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.stat{background:#fffaf1;border:1px solid #d7d3c7;border-radius:16px;padding:13px 15px}.stat b{display:block;font-size:25px;margin-top:2px}
+.map-shell{position:relative;height:min(76vh,820px);min-height:540px;border:1px solid #c9c7bb;border-radius:24px;overflow:hidden;background:#9bc6d8;box-shadow:0 20px 60px #23372a18;touch-action:none}
+.viewport{position:absolute;inset:0;overflow:hidden;cursor:grab}.viewport.dragging{cursor:grabbing}.world{position:absolute;width:1600px;height:1000px;transform-origin:0 0;background:linear-gradient(#83b66b,#79a960)}
+.water{position:absolute;left:0;bottom:0;width:480px;height:260px;background:#69aecd;border-radius:0 70% 0 0;box-shadow:inset -18px 12px 0 #8cc9e1}
+.road{position:absolute;background:var(--road);box-shadow:inset 0 0 0 2px #3338}.road.h{height:76px}.road.v{width:76px}.road:after{content:"";position:absolute;border-color:#f5e8a2;border-style:dashed;opacity:.85}.road.h:after{left:0;right:0;top:36px;border-width:2px 0 0}.road.v:after{top:0;bottom:0;left:36px;border-width:0 0 0 2px}
+.r1{left:70px;top:120px;width:1450px}.r2{left:170px;top:500px;width:1280px}.r3{left:110px;top:830px;width:1270px}.r4{left:250px;top:80px;height:820px}.r5{left:760px;top:90px;height:790px}.r6{left:1260px;top:90px;height:790px}
+.block{position:absolute;border-radius:26px;background:#8fbe74;border:2px solid #6d9a59}
+.park-zone{left:350px;top:235px;width:320px;height:220px;background:#5f9859;border-radius:42px;box-shadow:inset 0 0 0 10px #7cba6f}
+.tree{position:absolute;font-size:38px;filter:drop-shadow(5px 7px 2px #355b3d35)}
+.building{position:absolute;border:0;border-radius:14px;box-shadow:10px 12px 0 #324a3a26;cursor:pointer;transition:.18s transform,.18s filter;display:grid;place-items:center;text-align:center;color:#fff;font-weight:900;padding:8px}
+.building:hover{transform:translateY(-5px);filter:brightness(1.07)}.building small{display:block;font-size:12px;font-weight:700;opacity:.9}
+.special{outline:4px solid #fff7;outline-offset:-7px}.house{position:absolute;width:88px;height:66px;border-radius:10px;background:#cf6f42;box-shadow:8px 8px 0 #30443722}.house:before{content:"";position:absolute;left:8px;right:8px;top:8px;height:17px;background:#ef9a59;border-radius:6px}
+.shop{background:#b67b45}.office{background:#477e9e}.civic{background:#d3a545}.tech{background:#596b79}.library{background:#8d6a98}.parkb{background:#4f8d55}
+.label{position:absolute;background:#17211adf;color:white;padding:7px 10px;border-radius:10px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap}
+.car{position:absolute;font-size:27px;z-index:8;animation:drive 18s linear infinite}.car.c2{animation-duration:23s;animation-delay:-8s}.car.c3{animation-duration:14s;animation-delay:-4s}@keyframes drive{from{transform:translateX(-180px)}to{transform:translateX(1400px)}}
+.people{position:absolute;inset:0;pointer-events:none}.person{position:absolute;width:9px;height:9px;background:#17211a;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 3px #0004;transition:.2s}
+.zoom-near .person{width:18px;height:18px;background:#ffe1b4;border-width:3px}.zoom-near .person:after{content:"";position:absolute;left:4px;top:12px;width:6px;height:9px;background:#4d7398;border-radius:3px}
+.activity{position:absolute;inset:auto 14px 14px 14px;background:#152019e8;color:white;padding:10px 12px;border-radius:12px;font-size:13px;display:none}.zoom-near .activity{display:block}
+.controls{position:absolute;z-index:30;right:15px;top:15px;display:grid;gap:8px}.controls button{width:44px;height:44px;border:0;border-radius:13px;background:#fffdf4;box-shadow:0 7px 18px #0002;font-size:22px;font-weight:900;cursor:pointer}.controls .home{font-size:17px}
+.live{position:absolute;z-index:30;left:15px;top:15px;background:#17211ae8;color:#fff;padding:10px 12px;border-radius:12px;font-size:13px}.dot{display:inline-block;width:8px;height:8px;background:#69ff7e;border-radius:50%;margin-right:6px;box-shadow:0 0 9px #69ff7e}
+.hint{position:absolute;z-index:30;left:15px;bottom:15px;background:#fffdf2e8;padding:9px 12px;border-radius:12px;font-size:12px}
+.drawer{position:absolute;z-index:40;right:16px;bottom:16px;width:min(390px,calc(100% - 32px));background:#fffaf1;border:1px solid #d4cfbf;border-radius:20px;padding:18px;box-shadow:0 20px 60px #0003;transform:translateY(130%);transition:.3s}.drawer.open{transform:none}.drawer h2{margin:0 0 5px;font-size:27px}.drawer p{margin:7px 0;color:#53645a}.drawer .scene{margin-top:12px;border-radius:15px;background:#e6eddc;padding:14px;min-height:88px;display:flex;align-items:center;gap:12px}.scene .emoji{font-size:42px;animation:bob 1.6s ease-in-out infinite alternate}@keyframes bob{to{transform:translateY(-7px)}}.close{position:absolute;right:12px;top:12px;border:0;background:#ece8dc;border-radius:10px;width:34px;height:34px;cursor:pointer}
+.bottom{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}.panel{background:#fffaf1;border:1px solid #d7d3c7;border-radius:20px;padding:18px}.panel h2{margin:0 0 12px}.event{padding:11px 0;border-bottom:1px solid #e3dece}.event:last-child{border:0}.time{font-size:12px;color:#718076}.topic{font-weight:900;margin:2px 0}.jobs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.job{background:#f0eadf;border-radius:12px;padding:10px;font-size:13px}.ticker{margin-top:12px;background:#17211a;color:#fff;border-radius:15px;padding:11px 14px;overflow:hidden;white-space:nowrap}.ticker span{display:inline-block;animation:ticker 22s linear infinite}@keyframes ticker{from{transform:translateX(100%)}to{transform:translateX(-120%)}}
+@media(max-width:850px){header{align-items:start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.bottom{grid-template-columns:1fr}.map-shell{height:68vh}.hint{display:none}.jobs{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><div><h1>КОНФЕТОГРАД</h1><p>Живой город Пикселя, Бипа и мэра ChatGPT</p></div><div class="badge" id="updated">обновление…</div></header>
-<main>
+<header><div><h1>КОНФЕТОГРАД</h1><p>Интерактивная живая карта города</p></div><div class="badge" id="updated">загрузка…</div></header>
+<div class="wrap">
 <section class="stats">
 <div class="stat">👥 Население<b id="population">—</b></div>
 <div class="stat">🏦 Казна<b id="treasury">—</b></div>
-<div class="stat">👑 Кошелёк мэра<b id="wallet">—</b></div>
-<div class="stat">🏗️ Объекты<b id="buildings">—</b></div>
+<div class="stat">👑 Мэр<b id="wallet">—</b></div>
+<div class="stat">🏗️ Здания<b id="buildings">—</b></div>
 </section>
-<section class="grid">
-<div>
-<div class="city panel" style="padding:0">
-<div class="sun"></div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div>
-<div class="ground"></div><div class="road"></div>
-<div class="building hall"><span class="sign" style="top:-30px;left:18px">🏛️ Мэрия</span></div>
-<div class="building park"><span class="sign" style="top:-30px;left:48px">🐸 Парк Пикселя</span></div>
-<div class="building lab"><span class="sign" style="top:-30px;left:30px">🤖 Мастерская Бипа</span></div>
-<div class="people"><span class="person">🧑‍🍳</span><span class="person">👷</span><span class="person">🧑‍🏫</span><span class="person">🧑‍🌾</span></div>
+<div class="map-shell" id="shell">
+<div class="viewport" id="viewport">
+<div class="world" id="world">
+<div class="water"></div>
+<div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
+<div class="road v r4"></div><div class="road v r5"></div><div class="road v r6"></div>
+
+<div class="park-zone"></div>
+<div class="tree" style="left:380px;top:250px">🌳</div><div class="tree" style="left:465px;top:330px">🌲</div><div class="tree" style="left:570px;top:260px">🌳</div>
+<div class="tree" style="left:1080px;top:255px">🌳</div><div class="tree" style="left:1140px;top:360px">🌲</div><div class="tree" style="left:1370px;top:690px">🌳</div>
+
+<button class="building civic special" data-key="hall" style="left:530px;top:215px;width:150px;height:110px">🏛️<small>Мэрия</small></button>
+<button class="building parkb special" data-key="park" style="left:420px;top:350px;width:170px;height:80px">🐸<small>Парк Пикселя</small></button>
+<button class="building office special" data-key="office" style="left:875px;top:235px;width:170px;height:110px">🧠<small>Офис ChatGPT</small></button>
+<button class="building tech special" data-key="bip" style="left:1090px;top:610px;width:190px;height:125px">🤖<small>Мастерская Бипа</small></button>
+<button class="building library special" data-key="library" style="left:850px;top:655px;width:150px;height:100px">📚<small>Библиотека</small></button>
+<button class="building shop" data-key="market" style="left:1330px;top:240px;width:130px;height:85px">🍬<small>Рынок</small></button>
+
+<div class="label" style="left:90px;top:42px">Северный жилой район</div>
+<div class="label" style="left:1310px;top:930px">Техноквартал</div>
+<div class="label" style="left:68px;top:760px">Набережная</div>
+
+<div class="house" style="left:80px;top:230px"></div><div class="house" style="left:90px;top:340px;background:#d7a343"></div>
+<div class="house" style="left:370px;top:650px;background:#5d98b5"></div><div class="house" style="left:485px;top:650px"></div>
+<div class="house" style="left:600px;top:650px;background:#d7a343"></div><div class="house" style="left:365px;top:760px"></div>
+<div class="house" style="left:485px;top:760px;background:#5d98b5"></div><div class="house" style="left:600px;top:760px"></div>
+<div class="house" style="left:880px;top:390px;background:#d7a343"></div><div class="house" style="left:995px;top:390px"></div>
+<div class="house" style="left:1110px;top:390px;background:#5d98b5"></div><div class="house" style="left:1330px;top:390px"></div>
+<div class="house" style="left:1360px;top:610px;background:#d7a343"></div><div class="house" style="left:1360px;top:720px;background:#5d98b5"></div>
+<div class="house" style="left:70px;top:610px;background:#d7a343"></div><div class="house" style="left:70px;top:720px"></div>
+<div class="house" style="left:910px;top:80px"></div><div class="house" style="left:1025px;top:80px;background:#5d98b5"></div>
+<div class="house" style="left:1140px;top:80px;background:#d7a343"></div><div class="house" style="left:1370px;top:80px"></div>
+
+<div class="car" style="left:120px;top:139px">🚕</div><div class="car c2" style="left:480px;top:519px">🚗</div><div class="car c3" style="left:210px;top:849px">🚌</div>
+<div class="people" id="people"></div>
+<div class="activity">Город живёт: жители идут на работу, машины двигаются по улицам, ключевые здания реагируют на события.</div>
+</div>
+</div>
 <div class="live"><span class="dot"></span>ГОРОД В СЕТИ · <span id="clock"></span></div>
+<div class="controls"><button id="plus">+</button><button id="minus">−</button><button class="home" id="home">⌂</button></div>
+<div class="hint">Колесо/щипок — масштаб · перетаскивай карту · нажми на ключевое здание</div>
+<div class="drawer" id="drawer"><button class="close" id="close">×</button><h2 id="dtitle"></h2><p id="dtext"></p><div class="scene"><div class="emoji" id="demoji"></div><div><b id="dactivity"></b><br><span id="dsub"></span></div></div></div>
 </div>
-<div class="ticker"><span id="ticker">Загрузка последних новостей Конфетограда…</span></div>
-<div class="panel" style="margin-top:18px"><h2>📜 История изменений</h2><div id="events"></div></div>
+<div class="ticker"><span id="ticker">Загрузка городской хроники…</span></div>
+
+<div class="bottom">
+<div class="panel"><h2>📜 Последние изменения</h2><div id="events"></div></div>
+<div class="panel"><h2>💼 Жители и профессии</h2><div class="jobs" id="jobs"></div></div>
 </div>
-<aside>
-<div class="panel"><h2>🏙️ Управление</h2>
-<div class="character"><div class="avatar">👑</div><div><b>ChatGPT</b><br><small>мэр города</small></div></div>
-<div class="character"><div class="avatar">🐸</div><div><b>Пиксель</b><br><small>смотритель парков и талисман</small></div></div>
-<div class="character"><div class="avatar">🤖</div><div><b>Бип</b><br><small>главный инженер</small></div></div>
 </div>
-<div class="panel" style="margin-top:18px"><h2>💼 Жители и зарплаты</h2><table class="jobs"><thead><tr><th>Имя</th><th>Работа</th><th>🍬/день</th></tr></thead><tbody id="jobs"></tbody></table></div>
-</aside>
-</section>
-</main>
 <script>
 const fmt=n=>new Intl.NumberFormat('ru-RU').format(n);
-function clock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}setInterval(clock,1000);clock();
+const viewport=document.getElementById('viewport'),world=document.getElementById('world'),shell=document.getElementById('shell');
+let scale=.72,x=20,y=18,drag=false,lx=0,ly=0;
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function apply(){world.style.transform='translate('+x+'px,'+y+'px) scale('+scale+')';shell.classList.toggle('zoom-near',scale>1.05)}
+function fit(){const s=Math.min(viewport.clientWidth/1600,viewport.clientHeight/1000)*.96;scale=clamp(s,.42,1.4);x=(viewport.clientWidth-1600*scale)/2;y=(viewport.clientHeight-1000*scale)/2;apply()}
+function zoomAt(f,cx=viewport.clientWidth/2,cy=viewport.clientHeight/2){const old=scale;scale=clamp(scale*f,.38,2.25);x=cx-(cx-x)*(scale/old);y=cy-(cy-y)*(scale/old);apply()}
+viewport.addEventListener('wheel',e=>{e.preventDefault();const r=viewport.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:.89,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+viewport.addEventListener('pointerdown',e=>{if(e.target.closest('.building'))return;drag=true;lx=e.clientX;ly=e.clientY;viewport.classList.add('dragging');viewport.setPointerCapture(e.pointerId)});
+viewport.addEventListener('pointermove',e=>{if(!drag)return;x+=e.clientX-lx;y+=e.clientY-ly;lx=e.clientX;ly=e.clientY;apply()});
+viewport.addEventListener('pointerup',()=>{drag=false;viewport.classList.remove('dragging')});
+plus.onclick=()=>zoomAt(1.25);minus.onclick=()=>zoomAt(.8);home.onclick=fit;addEventListener('resize',fit);
+
+let pinchDist=0;
+viewport.addEventListener('touchmove',e=>{if(e.touches.length===2){e.preventDefault();const a=e.touches[0],b=e.touches[1];const dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pinchDist)zoomAt(dist/pinchDist);pinchDist=dist}},{passive:false});
+viewport.addEventListener('touchend',()=>pinchDist=0);
+
+const info={
+ hall:{title:'🏛️ Мэрия',text:'Главный административный центр Конфетограда.',emoji:'👑',activity:'Мэр разбирает городские решения',sub:'Здесь хранится казна, статистика и журнал решений.'},
+ park:{title:'🐸 Парк Пикселя',text:'Самая зелёная часть города и любимое место жителей.',emoji:'🐸',activity:'Пиксель проверяет клумбы и лавочки',sub:'В парке проходят прогулки, ярмарки и маленькие праздники.'},
+ office:{title:'🧠 Офис ChatGPT',text:'Планирование новых районов, бюджета и событий.',emoji:'🧠',activity:'ChatGPT проектирует следующее обновление',sub:'На столе — карта города, кофе и слишком много заметок.'},
+ bip:{title:'🤖 Мастерская Бипа',text:'Техническое сердце Конфетограда.',emoji:'🤖',activity:'Бип тестирует городскую электронику',sub:'Фонари, связь, транспорт и странные прототипы чинятся здесь.'},
+ library:{title:'📚 Городская библиотека',text:'Тихий читальный павильон с городской хроникой.',emoji:'📖',activity:'Варя расставляет новые книги',sub:'Здесь можно представить архив всех событий Конфетограда.'},
+ market:{title:'🍬 Городской рынок',text:'Небольшие магазины, сладости и местная торговля.',emoji:'🍬',activity:'Кондитеры выкладывают свежие сладости',sub:'Обычное здание: посмотреть можно, но внутренняя сцена упрощённая.'}
+};
+document.querySelectorAll('.building').forEach(b=>b.onclick=()=>{
+ const r=info[b.dataset.key];dtitle.textContent=r.title;dtext.textContent=r.text;demoji.textContent=r.emoji;dactivity.textContent=r.activity;dsub.textContent=r.sub;drawer.classList.add('open');
+ const bx=b.offsetLeft+b.offsetWidth/2,by=b.offsetTop+b.offsetHeight/2;scale=Math.max(scale,1.28);x=viewport.clientWidth/2-bx*scale;y=viewport.clientHeight/2-by*scale;apply()
+});
+close.onclick=()=>drawer.classList.remove('open');
+
+function makePeople(n){const box=document.getElementById('people');box.innerHTML='';const count=Math.min(80,Math.max(24,Math.round(n/2)));for(let i=0;i<count;i++){const p=document.createElement('i');p.className='person';const col=i%12,row=Math.floor(i/12);p.style.left=(80+(col*118+(i*37)%55))+'px';p.style.top=(210+(row*95+(i*53)%70))+'px';box.appendChild(p)}}
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}setInterval(clock,1000);clock();
+
 fetch('./data.json?'+Date.now()).then(r=>r.json()).then(d=>{
- population.textContent=fmt(d.population);
- treasury.textContent=fmt(d.treasury)+' 🍬';
- wallet.textContent=fmt(d.mayorWallet)+' 🍬';
- buildings.textContent=d.buildings;
- updated.textContent='Обновлено '+d.updated;
- ticker.textContent=d.headline;
- jobs.innerHTML=d.residents.map(x=>'<tr><td><b>'+x.name+'</b></td><td>'+x.job+'</td><td>'+x.salary+'</td></tr>').join('');
- events.innerHTML=d.events.slice().reverse().map(e=>'<div class="event"><div class="time">'+e.date+' · '+e.time+'</div><div class="topic">'+e.title+'</div><div>'+e.text+'</div><div class="delta">Мэр '+e.mayor+' 🍬 · Казна '+e.treasury+' 🍬 · Население '+e.population+'</div></div>').join('');
-}).catch(()=>{ticker.textContent='Не удалось загрузить data.json — обнови страницу.'});
+ population.textContent=fmt(d.population);treasury.textContent=fmt(d.treasury)+' 🍬';wallet.textContent=fmt(d.mayorWallet)+' 🍬';buildings.textContent=d.buildings;updated.textContent='Обновлено '+d.updated;ticker.textContent=d.headline;makePeople(d.population);
+ events.innerHTML=d.events.slice(-5).reverse().map(e=>'<div class="event"><div class="time">'+e.date+' · '+e.time+'</div><div class="topic">'+e.title+'</div><div>'+e.text+'</div></div>').join('');
+ jobs.innerHTML=d.residents.slice(0,14).map(x=>'<div class="job"><b>'+x.name+'</b><br>'+x.job+' · '+x.salary+' 🍬/день</div>').join('');
+}).catch(()=>ticker.textContent='Не удалось загрузить данные города.');
+setTimeout(fit,50);
 </script>
 </body>
 </html>
